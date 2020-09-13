@@ -1,4 +1,4 @@
-# DenonControl
+# denon-control
 
 Discovers your Denon AVR and lets you control it.
 
