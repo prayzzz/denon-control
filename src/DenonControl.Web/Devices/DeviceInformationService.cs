@@ -18,7 +18,8 @@ namespace DenonControl.Web.Devices
                 await GetMuteState(denonDevice),
                 await GetMasterVolume(denonDevice),
                 await GetMainZoneState(denonDevice),
-                await GetZone2State(denonDevice)
+                await GetZone2State(denonDevice),
+                await GetSubwooferLevel(denonDevice)
             );
 
             return deviceInformation;
@@ -44,6 +45,14 @@ namespace DenonControl.Web.Devices
                 "Z2ON" => ZoneState.On,
                 _ => ZoneState.Unknown
             };
+        }
+
+        private async Task<string> GetSubwooferLevel(DenonDevice denonDevice)
+        {
+            var value = await _commander.GetSubwooferLevel(denonDevice);
+            var match = Regex.Match(value, ".*PSSWL (?<volume>[0-9]+).*");
+
+            return match.Success ? match.Groups["volume"].Value : "-1";
         }
 
         private async Task<string> GetMasterVolume(DenonDevice denonDevice)

@@ -71,6 +71,16 @@ namespace DenonControl.Web.Devices
             return await IssueCommand(denonPlayer.Ip, "MV?");
         }
 
+        public async Task SetSubwooferLevel(DenonDevice denonPlayer, int value)
+        {
+            await IssueCommand(denonPlayer.Ip, $"PSSWL {value}");
+        }
+
+        public async Task<string> GetSubwooferLevel(DenonDevice denonPlayer)
+        {
+            return await IssueCommand(denonPlayer.Ip, "PSSWL ?");
+        }
+
         private async Task<string> IssueCommand(string ip, string command)
         {
             using Client client = new Client(ip, 23, new CancellationToken());
