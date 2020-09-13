@@ -1,0 +1,72 @@
+﻿@page "/"
+@using Microsoft.Extensions.Logging
+@using DenonControl.Web.Devices
+@implements IDisposable
+
+@inject Commander Commander
+@inject DeviceLocator DeviceLocator
+@inject DeviceInformationService DeviceInformationService
+@inject ILogger<Index> Logger
+
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-4">
+            <h5>Devices</h5>
+            <ul class="list-group">
+                @if (DeviceLocator.Devices.Any())
+                {
+                    @foreach (var denonDevice in DeviceLocator.Devices)
+                    {
+                        <li class="list-group-item" style="cursor: pointer" @onclick="() => SelectDevice(denonDevice)">
+                            @denonDevice.Name <br/>
+                            <small class="text-muted">(@denonDevice.Ip)</small>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item">No devices found</li>
+                }
+            </ul>
+        </div>
+        <div class="col">
+            @if (_selectedDevice != null)
+            {
+                <DeviceInformationComponent SelectedDevice="@_selectedDevice"></DeviceInformationComponent>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private IEnumerable<DenonDevice> _devices = new List<DenonDevice>();
+    private DenonDevice _selectedDevice;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        GetDevices();
+
+        DeviceLocator.OnSearchForDevicesFinished += GetDevices;
+    }
+
+    private void GetDevices()
+    {
+        _devices = DeviceLocator.Devices;
+        _selectedDevice = _devices.FirstOrDefault();
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void SelectDevice(DenonDevice denonDevice)
+    {
+        _selectedDevice = denonDevice;
+    }
+
+    public void Dispose()
+    {
+        DeviceLocator.OnSearchForDevicesFinished -= GetDevices;
+    }
+
+}

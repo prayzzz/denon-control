@@ -1,0 +1,212 @@
+﻿@using DenonControl.Web.Devices
+@inject Commander Commander
+@inject DeviceInformationService DeviceInformationService
+
+<h5>@SelectedDevice.Name</h5>
+
+@if (_isLoadingDeviceInformation && _deviceInformation == null)
+{
+    <text>Loading...</text>
+}
+
+@if (_deviceInformation != null)
+{
+    <div class="row mt-3">
+        <div class="col-sm-2 d-flex align-items-center">
+            Main Zone
+        </div>
+        <div class="col-sm">
+            @switch (_deviceInformation.MainZoneState)
+            {
+                case ZoneState.Unknown:
+                    <button class="btn btn-outline-dark" disabled>
+                        <span class="oi oi-question-mark"></span>
+                    </button>
+                    break;
+                case ZoneState.Off:
+                    <button class="btn btn-danger" @onclick="MainZoneOn">
+                        <span class="oi oi-power-standby"></span>
+                    </button>
+                    break;
+                case ZoneState.On:
+                    <button class="btn btn-success" @onclick="MainZoneOff">
+                        <span class="oi oi-power-standby"></span>
+                    </button>
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        </div>
+    </div>
+
+    <hr/>
+
+    <div class="row mt-3">
+        <div class="col-sm-2 d-flex align-items-center">
+            Zone 2
+        </div>
+        <div class="col-sm">
+            @switch (_deviceInformation.Zone2State)
+            {
+                case ZoneState.Unknown:
+                    <button class="btn btn-outline-dark" disabled>
+                        <span class="oi oi-question-mark"></span>
+                    </button>
+                    break;
+                case ZoneState.Off:
+                    <button class="btn btn-danger" @onclick="Zone2On">
+                        <span class="oi oi-power-standby"></span>
+                    </button>
+                    break;
+                case ZoneState.On:
+                    <button class="btn btn-success" @onclick="Zone2Off">
+                        <span class="oi oi-power-standby"></span>
+                    </button>
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        </div>
+    </div>
+
+    <hr/>
+
+    <div class="row">
+        <div class="col">
+            <div class="row">
+                <div class="col-6">
+                    Master Volume
+                </div>
+                <div class="col-6 text-right">
+                    @_masterVolume
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div>
+                        <input type="range"
+                               class="form-control-range"
+                               min="0" max="98"
+                               value="@_masterVolume"
+                               @oninput="@CreateMasterVolumeInputCallback()"
+                               @onchange="@CreateMasterVolumeChangedCallback()">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr/>
+
+    <div class="row">
+        <div class="col-sm-2 d-flex align-items-center">
+            Mute
+        </div>
+        <div class="col-sm">
+            @switch (_deviceInformation.MuteState)
+            {
+                case MuteState.Unknown:
+                    <button class="btn btn-outline-dark" disabled>
+                        <span class="oi oi-question-mark"></span>
+                    </button>
+                    break;
+                case MuteState.MuteOff:
+                    <button class="btn btn-outline-dark" @onclick="Mute">
+                        <span class="oi oi-volume-high" style="width: 20px"></span>
+                    </button>
+                    break;
+                case MuteState.MuteOn:
+                    <button class="btn btn-outline-dark" @onclick="Unmute">
+                        <span class="oi oi-volume-off" style="width: 20px"></span>
+                    </button>
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        </div>
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public DenonDevice SelectedDevice { get; set; } = null!;
+
+    private DeviceInformation? _deviceInformation;
+    private string _masterVolume = "0";
+    private bool _isLoadingDeviceInformation;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await RefreshDeviceInformation(SelectedDevice);
+    }
+
+    private void Mute()
+    {
+        Commander.Mute(SelectedDevice);
+        RefreshDeviceInformation(SelectedDevice);
+    }
+
+    private void Unmute()
+    {
+        Commander.Unmute(SelectedDevice);
+        RefreshDeviceInformation(SelectedDevice);
+    }
+
+    private void MainZoneOn()
+    {
+        Commander.MainZoneOn(SelectedDevice);
+        RefreshDeviceInformation(SelectedDevice);
+    }
+
+    private void MainZoneOff()
+    {
+        Commander.MainZoneOff(SelectedDevice);
+        RefreshDeviceInformation(SelectedDevice);
+    }
+
+    private void Zone2On()
+    {
+        Commander.Zone2On(SelectedDevice);
+        RefreshDeviceInformation(SelectedDevice);
+    }
+
+    private void Zone2Off()
+    {
+        Commander.Zone2Off(SelectedDevice);
+        RefreshDeviceInformation(SelectedDevice);
+    }
+
+    private EventCallback<ChangeEventArgs> CreateMasterVolumeChangedCallback()
+    {
+        return EventCallback.Factory.CreateBinder<string>(
+            this,
+            async value =>
+            {
+                await Commander.SetMasterVolume(SelectedDevice, int.Parse(_masterVolume));
+                RefreshDeviceInformation(SelectedDevice);
+            },
+            _masterVolume);
+    }
+
+    private EventCallback<ChangeEventArgs> CreateMasterVolumeInputCallback()
+    {
+        return EventCallback.Factory.CreateBinder<string>(
+            this,
+            value => _masterVolume = value,
+            _masterVolume);
+    }
+
+    private async Task RefreshDeviceInformation(DenonDevice denonDevice)
+    {
+        _isLoadingDeviceInformation = true;
+
+        _deviceInformation = await DeviceInformationService.GetDeviceInformation(denonDevice);
+        _masterVolume = _deviceInformation.MasterVolume;
+
+        _isLoadingDeviceInformation = false;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+}

@@ -1,0 +1,13 @@
+# Build Output
+[Dd]ebug/
+[Rr]elease/
+[Pp]ublish/
+[Bb]in/
+[Oo]bj/
+
+# IDE
+*.DotSettings.user
+.idea/
+
+# Misc
+publish.ps1

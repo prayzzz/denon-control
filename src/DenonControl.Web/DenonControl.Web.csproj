@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <RuntimeIdentifiers>win10-x64;linux-x64</RuntimeIdentifiers>
+        <LangVersion>default</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Rssdp" Version="4.0.3" />
+        <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
+        <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="8.2.0" />
+        <PackageReference Include="System.Net.Primitives" Version="4.3.0" />
+        <PackageReference Include="System.Text.Json" Version="4.7.2" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="5.5.1" />
+        <PackageReference Include="Telnet" Version="0.8.6" />
+    </ItemGroup>
+</Project>
