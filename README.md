@@ -2,6 +2,11 @@
 
 Discovers your Denon AVR and lets you control it.
 
+## Technologies
+
+* .NET Core (https://github.com/dotnet/core)
+* ASP.NET Core & Blazor (https://github.com/aspnet/Home)
+
 ## Screenshot
 
 ![](.github/web-interface.png)
