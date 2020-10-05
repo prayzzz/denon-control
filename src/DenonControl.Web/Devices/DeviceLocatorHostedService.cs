@@ -37,9 +37,16 @@ namespace DenonControl.Web.Devices
 
         private async void DoWork(object? state)
         {
-            _logger.LogDebug("Searching for Devices");
-            await _deviceLocator.SearchForDevices();
-            _logger.LogDebug("Done searching for Devices");
+            try
+            {
+                _logger.LogDebug("Searching for Devices");
+                await _deviceLocator.SearchForDevices();
+                _logger.LogDebug("Done searching for Devices");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Search for devices failed", e);
+            }
         }
     }
 }
