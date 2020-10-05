@@ -1,6 +1,6 @@
 # denon-control
 
-Discovers your Denon AVR and lets you control it.
+Web UI to control your Denon AVR.
 
 ## Technologies
 
