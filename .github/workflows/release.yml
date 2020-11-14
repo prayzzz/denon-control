@@ -1,0 +1,51 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/cache@v2
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.100
+
+    - name: Set version
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+    - name: Install dependencies
+      run: dotnet restore DenonControl.sln
+
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal DenonControl.sln
+
+    - name: Publish
+      run: dotnet publish -c release -o ./app --no-restore DenonControl.sln
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Docker
+      run: | 
+        docker build --pull -t prayzzz/denon-control:latest -t prayzzz/denon-control:${{ env.RELEASE_VERSION }} .
+        docker push prayzzz/denon-control:latest
+        docker push prayzzz/denon-control:${{ env.RELEASE_VERSION }}
+
